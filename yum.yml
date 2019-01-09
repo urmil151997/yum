@@ -1,0 +1,35 @@
+
+- hosts: all
+  tasks:
+#it will create directory
+  - name: create directory
+    file: 
+      path: /mnt/dvd
+      state: directory
+  become: 
+  vars:
+#ur dvd will be copied and pasted on path specified
+    - source_iso: "/run/media/root/RHEL-7.5\ Server.x86_64"
+    - dest_iso: "/run/media/root/RHEL-7.5\ Server.x86_64"
+    - repo_mount: "/mnt/dvd"
+  tasks:
+  - name: upload iso file
+    copy:
+     src: "{{source_iso}}" 
+     dest: "{{dest_iso}}"
+     force: no
+  - name: mount iso
+    mount:
+      path: "{{repo_mount}}" 
+      src: "{{dest_iso}}"
+      fstype: iso9660
+      opts: loop,ro
+      state: mounted
+  - name: Instll yum
+    yum_repository:
+      name: dvd1
+     description: rpm packages
+      file: yum
+      baseurl: "file://{{repo_mount}}"
+      enabled: yes
+      gpgcheck: no
